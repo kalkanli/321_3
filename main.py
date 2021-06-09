@@ -88,9 +88,54 @@ def delete_uniProt():
         return render_template('dbManager.html')
     return render_template('deleteProt.html')
 
-# 5 ? TODO
+# 5 ? TODO hard
+@app.route("/update-contributors", methods=['GET', 'POST'])
+def update_contributors():
+    if request.method == 'POST':
+        name = request.form['name']
+        username = request.form['username']
+        password = request.form['password']
+        institution = request.form['institution']
+        delete = request.form['delete']
+        rid = request.form['rid']
+        cursor.execute(
+            """SELECT doi
+            FROM bindingdb
+            WHERE reaction_id=%s""",
+            (rid)
+        )
+        doc = cursor.fetchone()
+        doi = doc[0]
+        if delete == 'Y':
+            cursor.execute(
+                """DELETE FROM doi 
+                WHERE (doi = %s)""",
+                (doi)
+            )
+        elif len(password) > 0:
+            hashed_password = hash_password(password)
+            cursor.execute(
+                """INSERT INTO users(username, password, institution, name)
+                VALUES(%s, %s, %s, %s)""",
+                (username, hashed_password, institution, name)
+            )
+            cursor.execute(
+                """INSERT INTO doi(doi, institution, author)
+                VALUES(%s, %s, %s)""",
+                (doi, institution, username)
+            )
+        else:
+            cursor.execute(
+                """INSERT INTO doi(doi, institution, author)
+                VALUES(%s, %s, %s)""",
+                (doi, institution, username)
+            )
+        connection.commit()
+        return render_template('dbManager.html')
+    return render_template('updateContributorsOfPaper.html')
 
-# 6 ? TODO
+
+# 6 ? TODO ez
 
 # 7
 @app.route("/user-login", methods=['GET', 'POST'])
@@ -117,7 +162,7 @@ def user_login():
     return render_template('userLogin.html')
 
 
-# 8 ? TODO
+# 8 ? TODO 
 @app.route("/drugs", methods=['GET'])
 def get_drugs():
     cursor.execute(
@@ -126,18 +171,22 @@ def get_drugs():
         WHERE drug.id=bdb.drug_id AND drug.id=sid.drug_id"""
     )
     drugs = cursor.fetchall()
-    
-@app.route("/test", methods=['GET'])
-def test():
-    a = {}
-    a['test'] = [1, 2]
-    if 'asdfasdf' not in a.keys():
-        print('testtest')
-
-        
-
 
 # 9 ? TODO
+@app.route("/view-interactions-of-drug", methods=['GET', 'POST'])
+def view_interactions_of_drug():
+    if request.method == 'POST':
+        drug_id = request.form['did']
+        cursor.execute(
+            """SELECT interacts.id2, drug.name
+            FROM interactswith interacts, drugs drug
+            WHERE interacts.id1=%s AND interacts.id2=drug.id""",
+            (drug_id)
+        )
+        interacts_with = cursor.fetchall()
+        print(interacts_with)
+    return render_template()
+
 
 # 10
 @app.route("/view-side-effects", methods=['GET', 'POST'])
@@ -194,8 +243,8 @@ def view_drugs_affecting_same_protein():
         ORDER BY binding.prot_id"""
     )
     drugs_affecting_same_protein = cursor.fetchall()
-    for tuple in drugs_affecting_same_protein:
-        print(tuple)
+    for i in drugs_affecting_same_protein:
+        print(i)
     return drugs_affecting_same_protein
 
 # 14
@@ -208,8 +257,8 @@ def view_proteins_bind_same_drug():
         ORDER BY binding.drug_id"""
     )
     prots_binds_same_drug = cursor.fetchall()
-    for tuple in prots_binds_same_drug:
-        print(tuple)
+    for i in prots_binds_same_drug:
+        print(i)
     return prots_binds_same_drug
 
 # 15
@@ -268,18 +317,36 @@ def view_drugs_with_least_side_effects():
 @app.route("/dois-and-contributors", methods=['GET'])
 def get_dois_and_contributors():
     cursor.execute(
-        """SELECT doi, userList
-        FROM bindingdb
-        GROUP BY doi, userList"""
+        """SELECT doi, author
+        FROM doi
+        GROUP BY doi"""
     )
-    dois_and_contributors = cursor.fetchall()
-    print(dois_and_contributors)
-    return dois_and_contributors
+    dois = cursor.fetchall()
+    print(dois)
+    return dois
 
-# 19 TODO
+# 19 TODO ez
+@app.route("rank-institutions", methods=['GET'])
+def rank_institutions():
+    cursor.execute(
+        """SELECT name 
+        FROM institution
+        ORDER BY points"""
+    )
+    institutions = cursor.fetchall()
+    print(institutions)
 
-# 20 TODO
+# 20 TODO STORED PROCEDURES
 
-# 21 TODO
 
-# 22 TODO
+
+
+
+@app.route("/test", methods=['GET'])
+def test():
+    a = {}
+    a['test'] = [1, 2]
+    if 'asdfasdf' not in a.keys():
+        print('testtest')
+
+        

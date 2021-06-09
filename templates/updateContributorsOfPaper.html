@@ -1,0 +1,20 @@
+<form action="{{ url_for("update_contributors")}}" method="post">
+    <label for="rid">Reaction ID:</label>
+    <input type="text" id="rid" name="rid" placeholder="">
+    <br>
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username" placeholder="">
+    <br>
+    <label for="password">Password:</label>
+    <input type="text" id="password" name="password" placeholder="">
+    <br>
+    <label for="name">Author Name:</label>
+    <input type="text" id="name" name="name" placeholder="">
+    <br>
+    <label for="institution">Institution:</label>
+    <input type="text" id="institution" name="institution" placeholder="">
+    <br>
+    <label for="delete">Delete? (Y/N)</label>
+    <input type="text" id="delete" name="delete" placeholder="">
+    <br>
+    <button type="submit">Update Contributor</button>
