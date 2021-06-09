@@ -1,0 +1,8 @@
+<form action="{{ url_for("update_affinity_of_a_drug")}}" method="post">
+    <label for="rid">Reaction ID:</label>
+    <input type="text" id="rid" name="rid" placeholder="">
+    <br>
+    <label for="affinity">New Affinity:</label>
+    <input type="text" id="affinity" name="affinity" placeholder="">
+    <br>
+    <button type="submit">Update</button>

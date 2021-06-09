@@ -54,9 +54,90 @@ def add_new_user():
             VALUES(%s, %s, %s, %s)""",
             (username, hashed_password, institution, name)
         )
+        connection.commit()
+        return render_template('dbManager.html')
     return render_template('addUser.html')
 
-# 9 ?
+# 3
+@app.route("/update-affinity-of-drug", methods=['GET', 'POST'])
+def update_affinity_of_a_drug():
+    if request.method == 'POST':
+        reaction_id = request.form['rid']
+        affinity = request.form['affinity']
+        cursor.execute(
+            """UPDATE bindingdb 
+            SET affinity=%s
+            WHERE (reaction_id = %s)""",
+            (affinity, reaction_id)
+        )
+        connection.commit()
+        return render_template('dbManager.html')
+    return render_template('updateAffinityOfDrug.html')
+
+# 4
+@app.route("/delete_uniProt", methods=['GET', 'POST'])
+def delete_uniProt():
+    if request.method == 'POST':
+        uniProt_id = request.form['pid']
+        cursor.execute(
+            """DELETE FROM UniProts 
+            WHERE (`id` = %s)""",
+            (uniProt_id)
+        )
+        connection.commit()
+        return render_template('dbManager.html')
+    return render_template('deleteProt.html')
+
+# 5 ? TODO
+
+# 6 ? TODO
+
+# 7
+@app.route("/user-login", methods=['GET', 'POST'])
+def user_login():
+    if request.method == 'POST':
+        username = request.form['username']
+        institution = request.form['institution']
+        password = request.form['password']
+        cursor.execute(
+            """SELECT password
+            FROM users
+            WHERE username=%s""",
+            (username)
+        )
+        hashed_password = cursor.fetchone()
+        if(hashed_password is None):
+            flash('No user found with given username')
+            return render_template('userLogin.html')
+        elif check_password(hashed_password[0], password):
+            return render_template('dbManager.html')
+        else:
+            flash('Wrong password')
+            return render_template('userLogin.html')
+    return render_template('userLogin.html')
+
+
+# 8 ? TODO
+@app.route("/drugs", methods=['GET'])
+def get_drugs():
+    cursor.execute(
+        """SELECT drug.id, drug.name, drug.smile, drug.description, sid.side_id, bdb.prot_id
+        FROM drugs drug, bindingdb bdb, sider sid
+        WHERE drug.id=bdb.drug_id AND drug.id=sid.drug_id"""
+    )
+    drugs = cursor.fetchall()
+    
+@app.route("/test", methods=['GET'])
+def test():
+    a = {}
+    a['test'] = [1, 2]
+    if 'asdfasdf' not in a.keys():
+        print('testtest')
+
+        
+
+
+# 9 ? TODO
 
 # 10
 @app.route("/view-side-effects", methods=['GET', 'POST'])
@@ -183,7 +264,7 @@ def view_drugs_with_least_side_effects():
     return render_template('searchKeywordInDrugDescriptions.html')
 
 
-# 18 ?
+# 18 ? TODO
 @app.route("/dois-and-contributors", methods=['GET'])
 def get_dois_and_contributors():
     cursor.execute(
@@ -195,10 +276,10 @@ def get_dois_and_contributors():
     print(dois_and_contributors)
     return dois_and_contributors
 
-# 19
+# 19 TODO
 
-# 20
+# 20 TODO
 
-# 21
+# 21 TODO
 
-# 22
+# 22 TODO
