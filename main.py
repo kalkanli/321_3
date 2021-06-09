@@ -1,6 +1,8 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, flash
 from flaskext.mysql import MySQL
 from flask import request
+import hashlib
+from helpers.password import check_password, hash_password
 
 app = Flask(__name__)
 
@@ -13,7 +15,46 @@ mysql.init_app(app)
 connection=mysql.connect()
 cursor = connection.cursor()
 
+app.secret_key = 'super secret key'
 
+# 1
+@app.route("/db-manager-login", methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        cursor.execute(
+            """SELECT password
+            FROM dbmanager
+            WHERE username=%s""",
+            (username)
+        )
+        hashed_password = cursor.fetchone()
+        if(hashed_password is None):
+            flash('No user found with given username')
+            return render_template('dbManagerLogin.html')
+        elif check_password(hashed_password[0], password):
+            return render_template('dbManager.html')
+        else:
+            flash('Wrong password')
+            return render_template('dbManagerLogin.html')
+    return render_template('dbManagerLogin.html')
+
+# 2
+@app.route("/add-new-user", methods=['GET', 'POST'])
+def add_new_user():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+        institution = request.form['institution']
+        name = request.form['name']
+        hashed_password = hash_password(password)
+        cursor.execute(
+            """INSERT INTO users(username, password, institution, name)
+            VALUES(%s, %s, %s, %s)""",
+            (username, hashed_password, institution, name)
+        )
+    return render_template('addUser.html')
 
 # 9 ?
 

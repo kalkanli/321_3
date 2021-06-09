@@ -1,0 +1,19 @@
+<html>
+
+<body style="">
+    <div class="main" style="align-self: center; ">
+        <form id="form_id" method="post" name="loginform" style="display: block; margin: 10px; ">
+            <label>username :</label>
+            <input type="text" name="username" id="username" style="display: block; margin: 10px;" />
+            <label>password:</label>
+            <input type="password" name="password" id="password" style="display: block; margin: 10px;" />
+            {% for message in get_flashed_messages() %}
+            <p>{{ message }}</p>
+            {% endfor %}
+            <input type="submit" value="Login" id="submit" onclick='' style="display: block; margin: 10px;" />
+        </form>
+    </div>
+    </div>
+</body>
+
+</html>
