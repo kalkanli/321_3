@@ -88,7 +88,7 @@ def delete_uniProt():
         return render_template('dbManager.html')
     return render_template('deleteProt.html')
 
-# 5 ? TODO hard
+# 5
 @app.route("/update-contributors", methods=['GET', 'POST'])
 def update_contributors():
     if request.method == 'POST':
@@ -109,8 +109,8 @@ def update_contributors():
         if delete == 'Y':
             cursor.execute(
                 """DELETE FROM doi 
-                WHERE (doi = %s)""",
-                (doi)
+                WHERE (doi=%s AND author=%s)""",
+                (doi, username)
             )
         elif len(password) > 0:
             hashed_password = hash_password(password)
@@ -326,7 +326,7 @@ def get_dois_and_contributors():
     return dois
 
 # 19 TODO ez
-@app.route("rank-institutions", methods=['GET'])
+@app.route("/rank-institutions", methods=['GET'])
 def rank_institutions():
     cursor.execute(
         """SELECT name 
