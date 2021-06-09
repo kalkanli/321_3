@@ -95,7 +95,6 @@ def update_contributors():
         name = request.form['name']
         username = request.form['username']
         password = request.form['password']
-        institution = request.form['institution']
         delete = request.form['delete']
         rid = request.form['rid']
         cursor.execute(
@@ -106,6 +105,16 @@ def update_contributors():
         )
         doc = cursor.fetchone()
         doi = doc[0]
+        print(doc)
+        cursor.execute(
+            """SELECT d.institution 
+            FROM doi d
+            WHERE d.doi=%s""",
+            (doi)
+        )
+        doc = cursor.fetchone()
+        print(doc)
+        institution = doc[0]
         if delete == 'Y':
             cursor.execute(
                 """DELETE FROM doi 
@@ -162,7 +171,7 @@ def user_login():
     return render_template('userLogin.html')
 
 
-# 8 TODO 
+# 8 TODO ??
 @app.route("/drugs", methods=['GET'])
 def get_drugs():
     cursor.execute(
@@ -222,12 +231,12 @@ def view_interacting_targets():
 @app.route("/view-interacting-drugs", methods=['GET', 'POST'])
 def view_interacting_drugs():
     if request.method == 'POST':
-        drug_id = request.form['did']
+        protein_id = request.form['pid']
         cursor.execute(
             """SELECT drug.name
-            FROM interactswith interacts, drugs drug
-            WHERE interacts.id1=%s AND drug.id=interacts.id2""",
-            (drug_id)
+            FROM bindingdb b, drugs drug
+            WHERE b.prot_id=%s AND drug.id=b.drug_id""",
+            (protein_id)
         )
         interacting_drugs = cursor.fetchall()
         print(interacting_drugs)
@@ -237,7 +246,7 @@ def view_interacting_drugs():
 @app.route("/view-drugs-affecting-same-protein", methods=['GET'])
 def view_drugs_affecting_same_protein():
     cursor.execute(
-        """SELECT drug.name, drug.id, prot.name, prot.id
+        """SELECT drug.id, prot.id
         FROM bindingdb binding, drugs drug, uniprot prot
         WHERE drug.id=binding.drug_id AND prot.id=binding.prot_id
         ORDER BY binding.prot_id"""
@@ -251,7 +260,7 @@ def view_drugs_affecting_same_protein():
 @app.route("/view-proteins-bind-same-drug", methods=['GET'])
 def view_proteins_bind_same_drug():
     cursor.execute(
-        """SELECT prot.name, prot.id, drug.name, drug.id
+        """SELECT prot.id, drug.id
         FROM bindingdb binding, drugs drug, uniprot prot
         WHERE drug.id=binding.drug_id AND prot.id=binding.prot_id
         ORDER BY binding.drug_id"""
@@ -329,7 +338,7 @@ def get_dois_and_contributors():
 @app.route("/rank-institutions", methods=['GET'])
 def rank_institutions():
     cursor.execute(
-        """SELECT name 
+        """SELECT name, points
         FROM institution
         ORDER BY points"""
     )
