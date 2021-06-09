@@ -162,7 +162,7 @@ def user_login():
     return render_template('userLogin.html')
 
 
-# 8 ? TODO 
+# 8 TODO 
 @app.route("/drugs", methods=['GET'])
 def get_drugs():
     cursor.execute(
@@ -172,7 +172,7 @@ def get_drugs():
     )
     drugs = cursor.fetchall()
 
-# 9 ? TODO
+# 9 TODO
 @app.route("/view-interactions-of-drug", methods=['GET', 'POST'])
 def view_interactions_of_drug():
     if request.method == 'POST':
