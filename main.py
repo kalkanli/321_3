@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = '12345678'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'atk0k0kk00'
 app.config['MYSQL_DATABASE_DB'] = 'dtbank'
 mysql = MySQL()
 mysql.init_app(app)
@@ -151,14 +151,14 @@ def update_contributors():
         elif len(password) > 0:
             hashed_password = hash_password(password)
             cursor.execute(
-                """INSERT INTO user(username, password, institution, name)
+                """INSERT INTO users(username, password, institution, name)
                 VALUES(%s, %s, %s, %s)""",
                 (username, hashed_password, institution, name)
             )
             cursor.execute(
-                """INSERT INTO contributors(doi, author)
-                VALUES(%s, %s)""",
-                (doi, username)
+                """INSERT INTO contributors(doi, author, institution)
+                VALUES(%s, %s, %s)""",
+                (doi, username, institution)
             )
         else:
             cursor.execute(
@@ -505,7 +505,7 @@ def affinityFind():
     return render_template('q20.html')
 
 
-@app.route("/test", methods=['GET'])
+@app.route("/add-data-to-db", methods=['GET'])
 def test():
     addData()
         

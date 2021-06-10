@@ -123,6 +123,52 @@ END
 
 """)
 
+    cur.execute("""
+CREATE TRIGGER trigger1 AFTER INSERT
+ON contributors FOR EACH ROW
+BEGIN
+	UPDATE institution SET points=points + 2
+    WHERE (new.institution=name);
+END
+
+""")
+
+
+    cur.execute("""
+
+    CREATE TRIGGER trigger2 AFTER DELETE
+ON contributors FOR EACH ROW
+BEGIN
+	UPDATE institution SET points=points - 2
+    WHERE (old.institution=name);
+END
+
+
+""")
+
+    cur.execute("""
+
+CREATE TRIGGER trigger3 AFTER INSERT
+ON publications FOR EACH ROW
+BEGIN
+	UPDATE institution SET points=points + 5
+    WHERE (new.institution=name);
+END
+
+
+""")
+
+    cur.execute("""
+
+CREATE TRIGGER trigger4 AFTER DELETE
+ON publications FOR EACH ROW
+BEGIN
+	UPDATE institution SET points=points - 5
+    WHERE (OLD.institution=name);
+END
+
+""")
+
     print('here')
     data = openpyxl.load_workbook(path)
 
@@ -245,6 +291,25 @@ END
         except:
             print
             ('')
+    
+    # cur.execute("""SELECT COUNT(doi), institution
+    #     FROM publications
+    #     group by institution"""
+    # )
+    # number_of_publications = cur.fetchall()
+    # print(number_of_publications)
+    # for i in number_of_publications:
+    #     num_of_papers = i[0]
+    #     inst = i[1]
+    #     print(num_of_papers, inst)
+    #     cur.execute("SELECT COUNT(author) FROM contributors WHERE institution=%s", (inst))
+    #     a = cur.fetchone()
+    #     num_of_authors  = a[0]
+    #     points = num_of_authors * 2 + num_of_papers * 5
+    #     cur.execute("UPDATE `dtbank`.`institution` SET `points` = %s WHERE (`name` = %s);", (points, inst))
+    # connection.commit()
+
+
     SIDER=data['SIDER']
 
     nofRows=SIDER.max_row
@@ -266,4 +331,4 @@ END
         except:
             print(cui,id, name)
     
-   
+    return "<p>Data successfully imported.</p>"
