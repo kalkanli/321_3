@@ -288,7 +288,7 @@ def view_proteins_bind_same_drug():
             arr.append(last_tuple)
     return render_template('protsBindingSameDrug.html', data=arr)
 
-# 15
+# 15 DONE
 @app.route("/view-drugs-with-specific-side-effect", methods=['GET', 'POST'])
 def view_drugs_with_specific_side_effect():
     if request.method == 'POST':
@@ -304,7 +304,7 @@ def view_drugs_with_specific_side_effect():
         return render_template('drugsWithSpecificSideEffect.html', data = prots_binds_same_drug)
     return render_template('viewDrugsWithSpecificSideEffect.html')
 
-# 16
+# 16 DONE
 @app.route("/search-keyword-in-drug-descriptions", methods=['GET', 'POST'])
 def search_keyword_in_drug_descriptions():
     if request.method == 'POST':
@@ -317,10 +317,10 @@ def search_keyword_in_drug_descriptions():
             (keyword)
         )
         drugs_with_the_keyword = cursor.fetchall()
-        print(drugs_with_the_keyword)
+        return render_template('drugsWithSpecificSideEffect.html', data=drugs_with_the_keyword)
     return render_template('searchKeywordInDrugDescriptions.html')
 
-# 17
+# 17 DONE
 @app.route("/view-drugs-with-least-side-effects", methods=['GET', 'POST'])
 def view_drugs_with_least_side_effects():
     if request.method == 'POST':
@@ -338,7 +338,8 @@ def view_drugs_with_least_side_effects():
         )
         drugs_with_least_side_effect = cursor.fetchall()
         print(drugs_with_least_side_effect)
-    return render_template('searchKeywordInDrugDescriptions.html')
+        return render_template('drugsWithSpecificSideEffect.html', data=drugs_with_least_side_effect)
+    return render_template('viewDrugsWithLeastSideEffects.html')
 
 
 # 18 ? TODO requires data analysis
@@ -347,11 +348,22 @@ def get_dois_and_contributors():
     cursor.execute(
         """SELECT doi, author
         FROM contributors
-        GROUP BY doi"""
+        ORDER BY doi"""
     )
     dois = cursor.fetchall()
-    print(dois)
-    return dois
+    # print(dois)
+    last_doi = ""
+    arr = []
+    for i in dois:
+        if last_doi != i[0]:
+            last_doi = i[0]
+            arr.append((i[0], [i[1]]))
+        else:
+            last_tuple = arr.pop()
+            if last_tuple[0].count(i[1]) == 0:
+                last_tuple[1].append(i[1])
+            arr.append(last_tuple)
+    return render_template('doiContributors.html', data = arr)
 
 # 19 TODO ez
 @app.route("/rank-institutions", methods=['GET'])
@@ -359,10 +371,10 @@ def rank_institutions():
     cursor.execute(
         """SELECT name, points
         FROM institution
-        ORDER BY points"""
+        ORDER BY points DESC"""
     )
     institutions = cursor.fetchall()
-    print(institutions)
+    return render_template('institutionRanking.html', data=institutions)
 
 # 20 TODO STORED PROCEDURES
 
