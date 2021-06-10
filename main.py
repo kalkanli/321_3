@@ -3,6 +3,7 @@ from flaskext.mysql import MySQL
 from flask import request
 import hashlib
 from helpers.password import check_password, hash_password
+from helpers.addData import addData
 
 app = Flask(__name__)
 
@@ -22,6 +23,7 @@ app.secret_key = 'super secret key'
 def homePage():
     return render_template('homepage.html')
 
+# addData()
 # 1 DONE
 
 
@@ -84,6 +86,20 @@ def update_affinity_of_a_drug():
         connection.commit()
         return render_template('dbManager.html')
     return render_template('updateAffinityOfDrug.html')
+
+@app.route("/delete-drug", methods=['GET', 'POST'])
+def delete_drug():
+    if request.method == 'POST':
+        reaction_id = request.form['rid']
+        
+        cursor.execute(
+            """DELETE FROM Drugs
+            WHERE (`id` = %s)""",
+            ( reaction_id)
+        )
+        connection.commit()
+        return render_template('dbManager.html')
+    return render_template('deleteDrug.html')
 
 # 4 DONE
 
@@ -197,7 +213,7 @@ def view_data_admin(type):
         
     elif type=='users':
         try:
-            cursor.execute("SELECT * FROM user")
+            cursor.execute("SELECT * FROM users")
             data=cursor.fetchall()
             return render_template('Users6.html', data=data)
         except Exception as e:
