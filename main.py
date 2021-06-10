@@ -162,7 +162,7 @@ def user_login():
             flash('No user found with given username')
             return render_template('userLogin.html')
         elif check_password(hashed_password[0], password):
-            return render_template('dbManager.html')
+            return render_template('user.html')
         else:
             flash('Wrong password')
             return render_template('userLogin.html')
