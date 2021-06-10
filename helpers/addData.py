@@ -113,6 +113,16 @@ def addData():
     
     cur.execute("CREATE TABLE `dtbank`.`SIDER` (`drug_id` VARCHAR(45) NOT NULL,`side_id` VARCHAR(45) NOT NULL, PRIMARY KEY (`drug_id`, `side_id`), CONSTRAINT `key3` FOREIGN KEY (`drug_id`) REFERENCES `dtbank`.`Drugs` (`id`) ON DELETE CASCADE ON UPDATE CASCADE, CONSTRAINT `key4` FOREIGN KEY (`side_id`) REFERENCES `dtbank`.`SideEffect` (`id`) ON DELETE CASCADE ON UPDATE CASCADE);")
     
+    cur.execute("""
+    CREATE PROCEDURE `q20`(fromval REAL, toval REAL, meas varchar(45) )
+BEGIN
+SELECT * FROM BindingDB
+WHERE (BindingDB.affinity between fromval and toval) AND (BindingDB.measure=meas); 
+
+END
+
+""")
+
     print('here')
     data = openpyxl.load_workbook(path)
 
