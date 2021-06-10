@@ -9,7 +9,7 @@ app = Flask(__name__)
 
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'atk0k0kk00'
+app.config['MYSQL_DATABASE_PASSWORD'] = '12345678'
 app.config['MYSQL_DATABASE_DB'] = 'dtbank'
 mysql = MySQL()
 mysql.init_app(app)
@@ -487,8 +487,23 @@ def rank_institutions():
 
 # 20 TODO STORED PROCEDURES
 
-
-
+@app.route("/affinity-interval", methods=['GET','POST'])
+def affinityFind():
+    if request.method == 'POST':
+        fromval = request.form['from']
+        toval = request.form['to']
+        measure = request.form['meas']
+        print(request.form)
+        cursor.execute(
+            """
+            call q20(%s,%s,%s)
+            """,
+            (fromval,toval,measure)
+        )
+        data=cursor.fetchall()
+        return render_template('q201.html',data=data)
+        
+    return render_template('q20.html')
 
 
 @app.route("/test", methods=['GET'])
