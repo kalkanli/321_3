@@ -105,39 +105,37 @@ def update_contributors():
         )
         doc = cursor.fetchone()
         doi = doc[0]
-        print(doc)
         cursor.execute(
-            """SELECT d.institution 
-            FROM doi d
-            WHERE d.doi=%s""",
+            """SELECT institution
+            FROM publications
+            WHERE doi=%s""",
             (doi)
         )
         doc = cursor.fetchone()
-        print(doc)
         institution = doc[0]
         if delete == 'Y':
             cursor.execute(
-                """DELETE FROM doi 
+                """DELETE FROM contributors
                 WHERE (doi=%s AND author=%s)""",
                 (doi, username)
             )
         elif len(password) > 0:
             hashed_password = hash_password(password)
             cursor.execute(
-                """INSERT INTO users(username, password, institution, name)
+                """INSERT INTO user(username, password, institution, name)
                 VALUES(%s, %s, %s, %s)""",
                 (username, hashed_password, institution, name)
             )
             cursor.execute(
-                """INSERT INTO doi(doi, institution, author)
-                VALUES(%s, %s, %s)""",
-                (doi, institution, username)
+                """INSERT INTO contributors(doi, author)
+                VALUES(%s, %s)""",
+                (doi, username)
             )
         else:
             cursor.execute(
-                """INSERT INTO doi(doi, institution, author)
-                VALUES(%s, %s, %s)""",
-                (doi, institution, username)
+                """INSERT INTO contibutors(doi, author)
+                VALUES(%s, %s)""",
+                (doi, username)
             )
         connection.commit()
         return render_template('dbManager.html')
