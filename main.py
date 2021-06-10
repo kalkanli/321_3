@@ -169,33 +169,34 @@ def user_login():
     return render_template('userLogin.html')
 
 
-# 8 TODO ??
+# 8 TODO ?? requires data analysis
 @app.route("/drugs", methods=['GET'])
 def get_drugs():
     cursor.execute(
-        """SELECT drug.id, drug.name, drug.smile, drug.description, sid.side_id, bdb.prot_id
+        """SELECT drug.id, drug.name, sid.side_id, bdb.prot_id
         FROM drugs drug, bindingdb bdb, sider sid
         WHERE drug.id=bdb.drug_id AND drug.id=sid.drug_id"""
     )
     drugs = cursor.fetchall()
 
-# 9 TODO
+# 9 TODO ??
 @app.route("/view-interactions-of-drug", methods=['GET', 'POST'])
 def view_interactions_of_drug():
     if request.method == 'POST':
         drug_id = request.form['did']
         cursor.execute(
-            """SELECT interacts.id2, drug.name
+            """SELECT interacts.id2, interacts.id1, drug.name
             FROM interactswith interacts, drugs drug
-            WHERE interacts.id1=%s AND interacts.id2=drug.id""",
+            WHERE "DB00271" IN (interacts.id1, interacts.id2) AND ((drug.id=interacts.id1 AND drug.id<>interacts.id2) OR (drug.id=interacts.id2 AND drug.id<>interacts.id1))
+            GROUP BY interacts.id2""",
             (drug_id)
         )
         interacts_with = cursor.fetchall()
-        print(interacts_with)
-    return render_template()
+        return render_template('drugInteractions.html', data=interacts_with)
+    return render_template('viewInteractionsOfADrug.html')
 
 
-# 10
+# 10 DONE
 @app.route("/view-side-effects", methods=['GET', 'POST'])
 def view_side_effects():
     if request.method == 'POST':
@@ -208,9 +209,10 @@ def view_side_effects():
         )
         side_effects = cursor.fetchall()
         print(side_effects)
+        return render_template('sideEffects.html', data=side_effects)
     return render_template('viewSideEffectsOfADrug.html')
 
-# 11
+# 11 DONE
 @app.route("/view-interacting-targets", methods=['GET', 'POST'])
 def view_interacting_targets():
     if request.method == 'POST':
@@ -222,10 +224,10 @@ def view_interacting_targets():
             (drug_id)
         )
         interacting_targets = cursor.fetchall()
-        print(interacting_targets)
+        return render_template('interactingProts.html', data=interacting_targets)
     return render_template('viewInteractingTargetsOfADrug.html')
 
-# 12
+# 12 DONE
 @app.route("/view-interacting-drugs", methods=['GET', 'POST'])
 def view_interacting_drugs():
     if request.method == 'POST':
@@ -238,9 +240,10 @@ def view_interacting_drugs():
         )
         interacting_drugs = cursor.fetchall()
         print(interacting_drugs)
-    return render_template('viewInteractingDrugsOfADrug.html')
+        return render_template('bindingDrugs.html', data = interacting_drugs)
+    return render_template('viewInteractingDrugsOfAProt.html')
 
-# 13
+# 13 DONE 
 @app.route("/view-drugs-affecting-same-protein", methods=['GET'])
 def view_drugs_affecting_same_protein():
     cursor.execute(
@@ -250,11 +253,19 @@ def view_drugs_affecting_same_protein():
         ORDER BY binding.prot_id"""
     )
     drugs_affecting_same_protein = cursor.fetchall()
+    last_prot = ""
+    arr = []
     for i in drugs_affecting_same_protein:
-        print(i)
-    return drugs_affecting_same_protein
+        if last_prot != i[1]:
+            last_prot = i[1]
+            arr.append((i[1], [i[0]]))
+        else:
+            last_tuple = arr.pop()
+            last_tuple[1].append(i[0])
+            arr.append(last_tuple)
+    return render_template('drugsAffectingSameProtein.html', data=arr)
 
-# 14
+# 14 DONE
 @app.route("/view-proteins-bind-same-drug", methods=['GET'])
 def view_proteins_bind_same_drug():
     cursor.execute(
@@ -264,9 +275,18 @@ def view_proteins_bind_same_drug():
         ORDER BY binding.drug_id"""
     )
     prots_binds_same_drug = cursor.fetchall()
+    last_drug = ""
+    arr = []
     for i in prots_binds_same_drug:
-        print(i)
-    return prots_binds_same_drug
+        if last_drug != i[1]:
+            last_drug = i[1]
+            arr.append((i[1], [i[0]]))
+        else:
+            last_tuple = arr.pop()
+            if last_tuple[1].count(i[0]) == 0:
+                last_tuple[1].append(i[0])
+            arr.append(last_tuple)
+    return render_template('protsBindingSameDrug.html', data=arr)
 
 # 15
 @app.route("/view-drugs-with-specific-side-effect", methods=['GET', 'POST'])
@@ -281,6 +301,7 @@ def view_drugs_with_specific_side_effect():
         )
         prots_binds_same_drug = cursor.fetchall()
         print(prots_binds_same_drug)
+        return render_template('drugsWithSpecificSideEffect.html', data = prots_binds_same_drug)
     return render_template('viewDrugsWithSpecificSideEffect.html')
 
 # 16
@@ -320,12 +341,12 @@ def view_drugs_with_least_side_effects():
     return render_template('searchKeywordInDrugDescriptions.html')
 
 
-# 18 ? TODO
+# 18 ? TODO requires data analysis
 @app.route("/dois-and-contributors", methods=['GET'])
 def get_dois_and_contributors():
     cursor.execute(
         """SELECT doi, author
-        FROM doi
+        FROM contributors
         GROUP BY doi"""
     )
     dois = cursor.fetchall()
