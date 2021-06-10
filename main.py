@@ -17,7 +17,7 @@ cursor = connection.cursor()
 
 app.secret_key = 'super secret key'
 
-# 1
+# 1 DONE
 @app.route("/db-manager-login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -40,7 +40,7 @@ def login():
             return render_template('dbManagerLogin.html')
     return render_template('dbManagerLogin.html')
 
-# 2
+# 2 DONE
 @app.route("/add-new-user", methods=['GET', 'POST'])
 def add_new_user():
     if request.method == 'POST':
@@ -58,7 +58,7 @@ def add_new_user():
         return render_template('dbManager.html')
     return render_template('addUser.html')
 
-# 3
+# 3 DONE
 @app.route("/update-affinity-of-drug", methods=['GET', 'POST'])
 def update_affinity_of_a_drug():
     if request.method == 'POST':
@@ -74,7 +74,7 @@ def update_affinity_of_a_drug():
         return render_template('dbManager.html')
     return render_template('updateAffinityOfDrug.html')
 
-# 4
+# 4 DONE
 @app.route("/delete_uniProt", methods=['GET', 'POST'])
 def delete_uniProt():
     if request.method == 'POST':
@@ -88,7 +88,7 @@ def delete_uniProt():
         return render_template('dbManager.html')
     return render_template('deleteProt.html')
 
-# 5
+# 5 NEEDS TESTING BUT DONE
 @app.route("/update-contributors", methods=['GET', 'POST'])
 def update_contributors():
     if request.method == 'POST':
@@ -142,9 +142,9 @@ def update_contributors():
     return render_template('updateContributorsOfPaper.html')
 
 
-# 6 ? TODO ez
+# 6 TODO
 
-# 7
+# 7 DONE
 @app.route("/user-login", methods=['GET', 'POST'])
 def user_login():
     if request.method == 'POST':
@@ -179,17 +179,16 @@ def get_drugs():
     )
     drugs = cursor.fetchall()
 
-# 9 TODO ??
+# 9 DONE
 @app.route("/view-interactions-of-drug", methods=['GET', 'POST'])
 def view_interactions_of_drug():
     if request.method == 'POST':
         drug_id = request.form['did']
         cursor.execute(
-            """SELECT interacts.id2, interacts.id1, drug.name
-            FROM interactswith interacts, drugs drug
-            WHERE "DB00271" IN (interacts.id1, interacts.id2) AND ((drug.id=interacts.id1 AND drug.id<>interacts.id2) OR (drug.id=interacts.id2 AND drug.id<>interacts.id1))
-            GROUP BY interacts.id2""",
-            (drug_id)
+            """SELECT d.id, d.name
+            FROM interactswith i, drugs d
+            WHERE %s IN (i.id1, i.id2) AND (i.id1=%s OR i.id2=%s) AND d.id!=%s AND d.id IN (i.id1, i.id2)""",
+            (drug_id, drug_id, drug_id, drug_id)
         )
         interacts_with = cursor.fetchall()
         return render_template('drugInteractions.html', data=interacts_with)
@@ -342,7 +341,7 @@ def view_drugs_with_least_side_effects():
     return render_template('viewDrugsWithLeastSideEffects.html')
 
 
-# 18 ? TODO requires data analysis
+# 18 DONE
 @app.route("/dois-and-contributors", methods=['GET'])
 def get_dois_and_contributors():
     cursor.execute(
@@ -365,7 +364,7 @@ def get_dois_and_contributors():
             arr.append(last_tuple)
     return render_template('doiContributors.html', data = arr)
 
-# 19 TODO ez
+# 19 DONE
 @app.route("/rank-institutions", methods=['GET'])
 def rank_institutions():
     cursor.execute(
