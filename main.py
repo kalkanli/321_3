@@ -9,19 +9,22 @@ app = Flask(__name__)
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_DATABASE_USER'] = 'root'
 app.config['MYSQL_DATABASE_PASSWORD'] = 'atk0k0kk00'
-app.config['MYSQL_DATABASE_DB']='dtbank'
+app.config['MYSQL_DATABASE_DB'] = 'dtbank'
 mysql = MySQL()
 mysql.init_app(app)
-connection=mysql.connect()
+connection = mysql.connect()
 cursor = connection.cursor()
 
 app.secret_key = 'super secret key'
+
 
 @app.route("/", methods=['GET', 'POST'])
 def homePage():
     return render_template('homepage.html')
 
 # 1 DONE
+
+
 @app.route("/db-manager-login", methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -45,6 +48,8 @@ def login():
     return render_template('dbManagerLogin.html')
 
 # 2 DONE
+
+
 @app.route("/add-new-user", methods=['GET', 'POST'])
 def add_new_user():
     if request.method == 'POST':
@@ -63,13 +68,15 @@ def add_new_user():
     return render_template('addUser.html')
 
 # 3 DONE
+
+
 @app.route("/update-affinity-of-drug", methods=['GET', 'POST'])
 def update_affinity_of_a_drug():
     if request.method == 'POST':
         reaction_id = request.form['rid']
         affinity = request.form['affinity']
         cursor.execute(
-            """UPDATE bindingdb 
+            """UPDATE bindingdb
             SET affinity=%s
             WHERE (reaction_id = %s)""",
             (affinity, reaction_id)
@@ -79,12 +86,14 @@ def update_affinity_of_a_drug():
     return render_template('updateAffinityOfDrug.html')
 
 # 4 DONE
+
+
 @app.route("/delete_uniProt", methods=['GET', 'POST'])
 def delete_uniProt():
     if request.method == 'POST':
         uniProt_id = request.form['pid']
         cursor.execute(
-            """DELETE FROM UniProts 
+            """DELETE FROM UniProts
             WHERE (`id` = %s)""",
             (uniProt_id)
         )
@@ -93,6 +102,8 @@ def delete_uniProt():
     return render_template('deleteProt.html')
 
 # 5 NEEDS TESTING BUT DONE
+
+
 @app.route("/update-contributors", methods=['GET', 'POST'])
 def update_contributors():
     if request.method == 'POST':
@@ -147,7 +158,71 @@ def update_contributors():
 
 
 # 6 TODO
+@app.route("/show-data-admin/<string:type>", methods=['GET'])
+def view_data_admin(type):
+    if type == 'drug':
+        try:
+            cursor.execute("SELECT * FROM Drugs ")
+            data=cursor.fetchall()
+            return render_template('Drugs6.html', data=data)
+        except Exception as e:
+            return 'db error' 
+    elif type=='prot':
+        try:
+            cursor.execute("SELECT * FROM UniProt ")
+            data=cursor.fetchall()
+            return render_template('UniProt6.html', data=data)
+        except Exception as e:
+            print("Problem deleting from db: " + str(e))
+            return 'db error'
+        
+    elif type=='side-effects':
+        try:
+            cursor.execute("SELECT * FROM SideEffect ")
+            data=cursor.fetchall()
+            print(data)
+            return render_template('SideEffects6.html', data=data)
+        except Exception as e:
+            print("error deleting from db: " + str(e))
+            return 'db error'
+        
+    elif type=='drug-target':
+        try:
+            cursor.execute("SELECT reaction_id,drug_id,prot_id,affinity,measure FROM BindingDB ")
+            data=cursor.fetchall()
+            return render_template('DrugTarget6.html', data=data)
+        except Exception as e:
+            print("error deleting from db: " + str(e))
+            return 'db error'
+        
+    elif type=='users':
+        try:
+            cursor.execute("SELECT * FROM user")
+            data=cursor.fetchall()
+            return render_template('Users6.html', data=data)
+        except Exception as e:
+            print("error deleting from db: " + str(e))
+            return 'db error'
+    elif type=='paper':
+        try:
+            cursor.execute("SELECT * FROM contributors")
+            data=cursor.fetchall()
+            result ={}
+            print (data[0])
+            for k in data:
+                result[k[0]]=[]
+            for k in data:
+                print(k[0],k[1])
+                result[k[0]].append(k[1])
+                print(result)
 
+            return render_template('contributors6.html',data=(result))
+            
+        except Exception as e:
+            print("error deleting from db: " + str(e))
+            return 'db error'
+    elif type=='home':
+        return render_template('showDataAdmin6.html')
 # 7 DONE
 @app.route("/user-login", methods=['GET', 'POST'])
 def user_login():
