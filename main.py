@@ -50,8 +50,6 @@ def login():
     return render_template('dbManagerLogin.html')
 
 # 2 DONE
-
-
 @app.route("/add-new-user", methods=['GET', 'POST'])
 def add_new_user():
     if request.method == 'POST':
@@ -109,7 +107,7 @@ def delete_uniProt():
     if request.method == 'POST':
         uniProt_id = request.form['pid']
         cursor.execute(
-            """DELETE FROM UniProts
+            """DELETE FROM UniProt
             WHERE (`id` = %s)""",
             (uniProt_id)
         )
@@ -249,8 +247,8 @@ def user_login():
         cursor.execute(
             """SELECT password
             FROM users
-            WHERE username=%s""",
-            (username)
+            WHERE username=%s AND institution=%s""",
+            (username, institution)
         )
         hashed_password = cursor.fetchone()
         if(hashed_password is None):
@@ -371,7 +369,8 @@ def view_drugs_affecting_same_protein():
             arr.append((i[1], [i[0]]))
         else:
             last_tuple = arr.pop()
-            last_tuple[1].append(i[0])
+            if last_tuple[1].count(i[0]) == 0:
+                last_tuple[1].append(i[0])
             arr.append(last_tuple)
     return render_template('drugsAffectingSameProtein.html', data=arr)
 
@@ -493,9 +492,5 @@ def rank_institutions():
 
 @app.route("/test", methods=['GET'])
 def test():
-    a = {}
-    a['test'] = [1, 2]
-    if 'asdfasdf' not in a.keys():
-        print('testtest')
-
+    addData()
         

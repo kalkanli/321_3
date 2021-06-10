@@ -9,7 +9,7 @@ app = Flask('__name__')
 
 app.config['MYSQL_DATABASE_HOST'] = 'localhost'
 app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = '12345678'
+app.config['MYSQL_DATABASE_PASSWORD'] = 'atk0k0kk00'
 app.config['MYSQL_DATABASE_DB']='dtbank' 
 # app.config['MYSQL_DATABASE_PORT']=3306
 
@@ -19,7 +19,7 @@ mysql.init_app(app)
 connection=mysql.connect()
 
 cur = connection.cursor()
-path = "/Users/ramazanbulut/Documents/GitHub/321_3/helpers/data.xlsx"
+path = "./helpers/data.xlsx"
 
 
 def addData():
@@ -248,10 +248,12 @@ def addData():
         try:
             cur.execute("INSERT INTO `dtbank`.`SideEffect` ( `id`, `name`) VALUES ( %s, %s)",(cui,name))
             connection.commit()
+        except:
+            print(cui,id,name)
+        try:
             cur.execute("INSERT INTO `dtbank`.`SIDER` ( `drug_id`, `side_id`) VALUES ( %s, %s)",(id,cui))
             connection.commit()
         except:
-            continue
-        # print(cui,id,name)
+            print(cui,id, name)
     
    
