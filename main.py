@@ -17,6 +17,10 @@ cursor = connection.cursor()
 
 app.secret_key = 'super secret key'
 
+@app.route("/", methods=['GET', 'POST'])
+def homePage():
+    return render_template('homepage.html')
+
 # 1 DONE
 @app.route("/db-manager-login", methods=['GET', 'POST'])
 def login():
@@ -242,7 +246,7 @@ def view_interacting_drugs():
         return render_template('bindingDrugs.html', data = interacting_drugs)
     return render_template('viewInteractingDrugsOfAProt.html')
 
-# 13 DONE 
+# 13 DONE
 @app.route("/view-drugs-affecting-same-protein", methods=['GET'])
 def view_drugs_affecting_same_protein():
     cursor.execute(
