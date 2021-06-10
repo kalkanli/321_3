@@ -173,15 +173,31 @@ def user_login():
     return render_template('userLogin.html')
 
 
-# 8 TODO ?? requires data analysis
+# 8 DONE
 @app.route("/drugs", methods=['GET'])
 def get_drugs():
     cursor.execute(
-        """SELECT drug.id, drug.name, sid.side_id, bdb.prot_id
-        FROM drugs drug, bindingdb bdb, sider sid
-        WHERE drug.id=bdb.drug_id AND drug.id=sid.drug_id"""
+        """SELECT d.id, d.name, d.smile, d.description, u.name, e.name
+        FROM drugs d,bindingdb b, sider s, uniprot u, sideeffect e
+        WHERE d.id=b.drug_id AND s.drug_id=d.id AND s.side_id=e.id AND b.prot_id=u.id"""
     )
     drugs = cursor.fetchall()
+    last_drug = ""
+    arr = []
+    for i in drugs:
+        if last_drug != i[1]:
+            last_drug = i[1]
+            arr.append((i[0], i[1], i[2], i[3], [i[4]], [i[5]]))
+        else:
+            last_tuple = arr.pop()
+            if last_tuple[4].count(i[4]) == 0:
+                last_tuple[4].append(i[4])
+            if last_tuple[5].count(i[5]) == 0:
+                last_tuple[5].append(i[5])
+            arr.append(last_tuple)
+    return render_template('drugs.html', data=arr)
+    
+
 
 # 9 DONE
 @app.route("/view-interactions-of-drug", methods=['GET', 'POST'])
@@ -354,7 +370,6 @@ def get_dois_and_contributors():
         ORDER BY doi"""
     )
     dois = cursor.fetchall()
-    # print(dois)
     last_doi = ""
     arr = []
     for i in dois:
